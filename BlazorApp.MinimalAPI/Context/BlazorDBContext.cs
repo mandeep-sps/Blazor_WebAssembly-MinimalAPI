@@ -1,5 +1,4 @@
 ﻿using BlazorApp.Server.Models;
-using BlazorApp.Server.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazorApp.Server.Context

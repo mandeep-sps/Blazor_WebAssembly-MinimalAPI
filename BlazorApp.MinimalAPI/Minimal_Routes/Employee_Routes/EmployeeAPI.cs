@@ -1,6 +1,6 @@
 ﻿using BlazorApp.Server.Services;
-using Microsoft.AspNetCore.Mvc;
 using BlazorApp.Shared;
+using Microsoft.AspNetCore.Mvc;
 namespace BlazorApp.Server
 {
     public static class EmployeeAPI
