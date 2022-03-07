@@ -5,7 +5,6 @@ namespace BlazorApp.Server
 {
     public static class EmployeeAPI
     {
-
         public static void MapEmployeeRoutes(this IEndpointRouteBuilder app)
         {
             // Get
@@ -13,10 +12,8 @@ namespace BlazorApp.Server
             {
                 var response = await employeeService.GetEmployees();
 
-                //if (response.Any())
                 return Results.Ok(response);
-                //else
-                //    return Results.NotFound();
+
             });
 
             // Post

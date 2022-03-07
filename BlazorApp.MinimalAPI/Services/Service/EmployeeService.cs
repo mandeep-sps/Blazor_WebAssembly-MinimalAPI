@@ -28,7 +28,7 @@ namespace BlazorApp.Server.Services
 
                 return await repository.AddAsync(model) > 0;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }
@@ -42,7 +42,7 @@ namespace BlazorApp.Server.Services
 
                 return employees;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }
@@ -56,7 +56,7 @@ namespace BlazorApp.Server.Services
 
                 return employee;
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
                 throw;
@@ -98,7 +98,7 @@ namespace BlazorApp.Server.Services
                 else
                     return false;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }

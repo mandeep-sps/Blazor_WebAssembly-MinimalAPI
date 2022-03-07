@@ -55,7 +55,7 @@
         <div class="row mt-3">
             <div class="col">
                 <SfButton IsPrimary="true" type="submit" CssClass="e-outline e-small">@Update</SfButton>
-                <SfButton IsPrimary="false" OnClick="()=>NavigateToList()" CssClass="e-info e-outline e-small ">Back to List </SfButton>
+                <SfButton IsPrimary="false" OnClick="()=>NavigateToList()" CssClass="e-danger e-outline e-small ">Cancel </SfButton>
             </div>
         </div>
     </EditForm>
@@ -121,6 +121,6 @@
         NavigateToList();
     }
 
-    private void NavigateToList() => navman.NavigateTo("fetchemployees");
+    private void NavigateToList() => navman.NavigateTo("/");
 }
 

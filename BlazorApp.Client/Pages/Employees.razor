@@ -1,12 +1,11 @@
-﻿@page "/fetchemployees"
+﻿@page "/"
 
 @inject NavigationManager navman
 @inject HttpClient httpClient
 @inject IJSRuntime JSRuntime
 
 <div class="row">
-    <div class="col-sm-10"><h1>Employees</h1></div>
-    <div class="col-sm-2"><a class="btn btn-sm btn-outline-primary" href="/add">Add new</a></div>
+    <div class="col-sm-10"><h2>Employees</h2></div>
 </div>
 
 @if (employees == null)
@@ -15,10 +14,25 @@
 }
 else
 {
-    <SfGrid DataSource="@employees" AllowPaging="true" AllowFiltering="true" RowHeight="38" AllowSorting="true" Toolbar="@ToolbarItems" Height="410" Width="auto"
+    <SfGrid @ref="sfGrid" DataSource="@employees" AllowPaging="true" AllowFiltering="true" RowHeight="38" AllowSorting="true" Height="410" Width="auto"
         EnableVirtualization="true">
-        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+        <SfToolbar>
+            <ToolbarItems>
+                <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Right">
+                    <Template>
+                        <SfTextBox CssClass="e-small" ID="search-grid" FloatLabelType="@FloatLabelType.Auto" Placeholder="Search" Input="OnInput"></SfTextBox>
+                    </Template>
+                </ToolbarItem>
+                <ToolbarItem Type="ItemType.Button" Align="ItemAlign.Left">
+                    <Template>
+                        <SfButton CssClass="e-info e-success e-small" OnClick='(()=>navman.NavigateTo("/add"))'>Add new record </SfButton>
+                    </Template>
+                </ToolbarItem>
+            </ToolbarItems>
+        </SfToolbar>
 
+        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+        <GridPageSettings PageCount="10" PageSizes="true"></GridPageSettings>
         <GridColumns>
             <GridColumn Field=@nameof(EmployeeDTO.EmployeeCode) HeaderText="Employee Code" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip" TextAlign="TextAlign.Left"></GridColumn>
             <GridColumn Field=@nameof(EmployeeDTO.Name) HeaderText="Name" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
@@ -57,8 +71,12 @@ else
 <style>
     .material .e-dialog {
         height: 270px;
-        visibility: visible;
     }
+
+   input#search-grid {
+    margin-top: -5px;
+}
+}
 </style>
 
 @code {
@@ -67,9 +85,41 @@ else
     private int ID { get; set; } = 0;
     public List<EmployeeDTO> employees { get; set; }
     private string errorMessage;
-    private List<string> ToolbarItems = new List<string>() { "Add" };
     private DialogSettings DialogParams = new DialogSettings { MinHeight = "400px", Width = "450px" };
+    public SfGrid<EmployeeDTO> sfGrid { get; set; }
 
+    protected async override Task OnInitializedAsync()
+    {
+        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>("employees");
+
+    }
+
+    private async Task OnInput(InputEventArgs args)
+    {
+        await this.sfGrid.SearchAsync(args.Value);
+    }
+
+    private async Task DeleteEmployee(int Id)
+    {
+        using var httpResponse = await httpClient.DeleteAsync("employee/" + Id);
+
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            // set error message for display, log to console and return
+            errorMessage = httpResponse.ReasonPhrase;
+            Console.WriteLine($"There was an error! {errorMessage}");
+
+        }
+
+        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>("employees");
+        StateHasChanged();
+    }
+
+
+    private void EditEmployee(int Id)
+    {
+        navman.NavigateTo("add/" + Id);
+    }
 
     private void ConfirmBtn(int Id)
     {
@@ -89,37 +139,6 @@ else
     {
         ID = 0;
         this.ConfirmDlgVisible = false;
-    }
-
-    protected async override Task OnInitializedAsync()
-    {
-        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>("employees");
-
-    }
-
-
-    private async Task DeleteEmployee(int Id)
-    {
-
-
-        using var httpResponse = await httpClient.DeleteAsync("employee/" + Id);
-
-        if (!httpResponse.IsSuccessStatusCode)
-        {
-            // set error message for display, log to console and return
-            errorMessage = httpResponse.ReasonPhrase;
-            Console.WriteLine($"There was an error! {errorMessage}");
-
-        }
-
-        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>("employees");
-        StateHasChanged();
-    }
-
-
-    private void EditEmployee(int Id)
-    {
-        navman.NavigateTo("add/" + Id);
     }
 
 }
