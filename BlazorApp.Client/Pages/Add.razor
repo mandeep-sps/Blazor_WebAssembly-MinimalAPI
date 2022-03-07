@@ -1,0 +1,126 @@
+﻿@page "/add"
+@page "/add/{Id:int}"
+@using BlazorApp.Shared.Utils
+@inject NavigationManager navman
+@inject HttpClient httpClient
+@inject IJSRuntime JsRuntime
+
+<div class="container-fluid">
+    <EditForm class="container" Model="Employee" OnValidSubmit="SubmitEmployee">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col">
+                <label>
+                    Name:
+                </label>
+                <InputText class="form-control" @bind-Value="Employee.Name"></InputText>
+                <ValidationMessage For="@(() => Employee.Name)" />
+            </div>
+            <div class="col">
+                <label>
+                    Email:
+                </label>
+                <InputText class="form-control" @bind-Value="Employee.Email"></InputText>
+                <ValidationMessage For="@(() => Employee.Email)" />
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="form-group col">
+                <label>
+                    Designation:
+                </label>
+                <select class="form-control form-select" @bind="Employee.Designation">
+                    <option selected disabled>Select Designation</option>
+                    @foreach (var value in Enum.GetValues(typeof(Designation)))
+                    {
+                        <option>@value</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Employee.Designation)" />
+            </div>
+            <div class="col ">
+                <label>
+                    Department:
+                </label>
+                <InputSelect class="form-control form-select" @bind-Value="Employee.Department">
+                    <option selected disabled>Select Department</option>
+                    @foreach (var value in Enum.GetValues(typeof(Department)))
+                    {
+                        <option>@value</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => Employee.Department)" />
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col">
+                <SfButton IsPrimary="true" type="submit" CssClass="e-outline e-small">@Update</SfButton>
+                <SfButton IsPrimary="false" OnClick="()=>NavigateToList()" CssClass="e-info e-outline e-small ">Back to List </SfButton>
+            </div>
+        </div>
+    </EditForm>
+
+    <SfDialog @bind-Visible="ConfirmDlgVisible" Width="300px">
+        <DialogTemplates>
+            <Header>
+                @Message
+            </Header>
+            <Content>
+                Employee @Message Successfully.
+            </Content>
+        </DialogTemplates>
+        <DialogButtons>
+            <DialogButton Content="OKY" OnClick="@HideDialog" />
+        </DialogButtons>
+    </SfDialog>
+</div>
+
+@code {
+    private EmployeeDTO Employee = new();
+    private bool ConfirmDlgVisible { get; set; } = false;
+    [Parameter]
+    public int Id { get; set; }
+    public string Update { get; set; } = "Submit";
+    public string Message { get; set; } = "Added";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            var emp = await httpClient.GetFromJsonAsync<EmployeeDTO>("employee/" + Id);
+            Employee = emp;
+            Update = "Update";
+        }
+    }
+
+    private async Task SubmitEmployee()
+    {
+        if (Id > 0)
+        {
+            await httpClient.PutAsJsonAsync<EmployeeDTO>("employee", Employee);
+            Message = "Updated";
+
+        }
+        else
+        {
+            await httpClient.PostAsJsonAsync<EmployeeDTO>("employee", Employee);
+        }
+
+        AlertBox();
+    }
+
+    private void AlertBox()
+    {
+        ConfirmDlgVisible = true;
+    }
+
+    private void HideDialog(Object e)
+    {
+        this.ConfirmDlgVisible = false;
+        NavigateToList();
+    }
+
+    private void NavigateToList() => navman.NavigateTo("fetchemployees");
+}
+

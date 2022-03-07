@@ -21,9 +21,9 @@ namespace BlazorApp.Server.Services
                 {
                     Name = employee.Name,
                     Email = employee.Email,
-                    Department = employee.Department,
-                    Designation = employee.Designation,
-                    EmployeeCode = employee.EmployeeCode,
+                    Department = employee.Department.GetValueOrDefault(),
+                    Designation = employee.Designation.GetValueOrDefault(),
+                    EmployeeCode = GenerateEmployeeCode(),
                 };
 
                 return await repository.AddAsync(model) > 0;
@@ -38,7 +38,7 @@ namespace BlazorApp.Server.Services
         {
             try
             {
-                var employees = await repository.GetAll<Employee>().Select(EmployeeExpression()).OrderBy(x => x.Name).ToListAsync();
+                var employees = await repository.GetAll<Employee>().Select(EmployeeExpression()).OrderBy(x => x.EmployeeCode).ToListAsync();
 
                 return employees;
             }
@@ -90,9 +90,8 @@ namespace BlazorApp.Server.Services
                 {
                     model.Name = employee.Name;
                     model.Email = employee.Email;
-                    model.Department = employee.Department;
-                    model.Designation = employee.Designation;
-                    model.EmployeeCode = employee.EmployeeCode;
+                    model.Department = employee.Department.GetValueOrDefault();
+                    model.Designation = employee.Designation.GetValueOrDefault();
 
                     return await repository.UpdateAsync(model) > 0;
                 }
@@ -119,6 +118,18 @@ namespace BlazorApp.Server.Services
             {
                 throw;
             }
+        }
+
+        private string GenerateEmployeeCode()
+        {
+            var prefix = "SP-";
+            long code = 1001;
+            while (repository.GetAll<Employee>().Any(x => x.EmployeeCode.Equals($"{prefix}{code}")))
+            {
+                code++;
+            }
+            return prefix + code;
+
         }
     }
 }

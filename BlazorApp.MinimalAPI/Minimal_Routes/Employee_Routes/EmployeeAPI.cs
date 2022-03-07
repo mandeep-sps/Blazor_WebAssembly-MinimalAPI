@@ -13,10 +13,10 @@ namespace BlazorApp.Server
             {
                 var response = await employeeService.GetEmployees();
 
-                if (response.Any())
-                    return Results.Ok(response);
-                else
-                    return Results.NotFound();
+                //if (response.Any())
+                return Results.Ok(response);
+                //else
+                //    return Results.NotFound();
             });
 
             // Post

@@ -1,4 +1,5 @@
 using BlazorApp.Shared.Utils;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlazorApp.Shared
 {
@@ -6,14 +7,19 @@ namespace BlazorApp.Shared
     {
         public int Id { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
+        [Required, EmailAddress]
         public string Email { get; set; }
 
-        public Designation Designation { get; set; }
+        [Required]
+        public Designation? Designation { get; set; }
 
-        public Department Department { get; set; }
+        [Required]
+        public Department? Department { get; set; }
 
+        [Display(Name = "Employee Code")]
         public string EmployeeCode { get; set; }
 
     }

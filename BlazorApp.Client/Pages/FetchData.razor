@@ -1,57 +1,125 @@
-﻿@page "/fetchdata"
-@inject HttpClient Http
+﻿@page "/fetchemployees"
 
-<PageTitle>Weather forecast</PageTitle>
+@inject NavigationManager navman
+@inject HttpClient httpClient
+@inject IJSRuntime JSRuntime
 
-<h1>Weather forecast</h1>
+<div class="row">
+    <div class="col-sm-10"><h1>Employees</h1></div>
+    <div class="col-sm-2"><a class="btn btn-sm btn-outline-primary" href="/add">Add new</a></div>
+</div>
 
-<p>This component demonstrates fetching data from the server.</p>
-
-@if (forecasts == null)
+@if (employees == null)
 {
-    <p><em>Loading...</em></p>
+    <SfSpinner Visible="true"></SfSpinner>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <SfGrid DataSource="@employees" AllowPaging="true" AllowFiltering="true" RowHeight="38" AllowSorting="true" Toolbar="@ToolbarItems" Height="410" Width="auto"
+        EnableVirtualization="true">
+        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+
+        <GridColumns>
+            <GridColumn Field=@nameof(EmployeeDTO.EmployeeCode) HeaderText="Employee Code" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip" TextAlign="TextAlign.Left"></GridColumn>
+            <GridColumn Field=@nameof(EmployeeDTO.Name) HeaderText="Name" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+            <GridColumn Field=@nameof(EmployeeDTO.Email) HeaderText="Email" TextAlign="TextAlign.Left" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+            <GridColumn Field=@nameof(EmployeeDTO.Department) HeaderText="Department" TextAlign="TextAlign.Left" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+            <GridColumn Field=@nameof(EmployeeDTO.Designation) HeaderText="Designation" TextAlign="TextAlign.Left" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+            <GridColumn>
+                <Template>
+                    @{
+                    var Employee = (context as EmployeeDTO);
+                    <SfButton IsPrimary="true" OnClick="()=>EditEmployee(Employee.Id)" CssClass="e-outline e-small">Edit </SfButton>
+                    <SfButton CssClass="e-danger e-outline e-small" OnClick="()=>ConfirmBtn(Employee.Id)">Delete</SfButton>
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
+
 }
 
+<SfDialog @bind-Visible="ConfirmDlgVisible" Width="300px">
+    <DialogTemplates>
+        <Header>
+            Delete Item
+        </Header>
+        <Content>
+            Are you sure you want to permanently delete this item ?
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Yes" IsPrimary="true" OnClick="@ConfirmDelete" />
+        <DialogButton Content="No" OnClick="@HideDialog" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .material .e-dialog {
+        height: 270px;
+        visibility: visible;
+    }
+</style>
+
 @code {
-    private WeatherForecast[]? forecasts;
 
-    protected override async Task OnInitializedAsync()
+    private bool ConfirmDlgVisible { get; set; } = false;
+    private int ID { get; set; } = 0;
+    public List<EmployeeDTO> employees { get; set; }
+    private string errorMessage;
+    private List<string> ToolbarItems = new List<string>() { "Add" };
+    private DialogSettings DialogParams = new DialogSettings { MinHeight = "400px", Width = "450px" };
+
+
+    private void ConfirmBtn(int Id)
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        ID = Id;
+        ConfirmDlgVisible = true;
     }
 
-    public class WeatherForecast
+
+    private async Task ConfirmDelete(Object e)
     {
-        public DateTime Date { get; set; }
+        await DeleteEmployee(ID);
 
-        public int TemperatureC { get; set; }
-
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        this.ConfirmDlgVisible = false;
     }
+
+    private void HideDialog(Object e)
+    {
+        ID = 0;
+        this.ConfirmDlgVisible = false;
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>("employees");
+
+    }
+
+
+    private async Task DeleteEmployee(int Id)
+    {
+
+
+        using var httpResponse = await httpClient.DeleteAsync("employee/" + Id);
+
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            // set error message for display, log to console and return
+            errorMessage = httpResponse.ReasonPhrase;
+            Console.WriteLine($"There was an error! {errorMessage}");
+
+        }
+
+        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>("employees");
+        StateHasChanged();
+    }
+
+
+    private void EditEmployee(int Id)
+    {
+        navman.NavigateTo("add/" + Id);
+    }
+
 }
