@@ -129,7 +129,6 @@ namespace BlazorApp.Server.Services
                 code++;
             }
             return prefix + code;
-
         }
     }
 }
