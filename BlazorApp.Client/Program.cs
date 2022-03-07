@@ -7,7 +7,7 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTkxMjEwQDMxMzky
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7032/api/") });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:7990/api/") });
 builder.Services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
 
 await builder.Build().RunAsync();
