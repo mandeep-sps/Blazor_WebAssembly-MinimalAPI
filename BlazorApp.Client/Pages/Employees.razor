@@ -14,8 +14,7 @@
 }
 else
 {
-    <SfGrid @ref="sfGrid" DataSource="@employees" AllowPaging="true" AllowFiltering="true" RowHeight="38" AllowSorting="true" Height="410" Width="auto"
-        EnableVirtualization="true">
+    <SfGrid @ref="sfGrid" DataSource="@employees" AllowPaging="true" AllowFiltering="true" RowHeight="38" AllowSorting="true" Height="410" Width="auto">
         <SfToolbar>
             <ToolbarItems>
                 <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Right">
@@ -32,7 +31,7 @@ else
         </SfToolbar>
 
         <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
-        <GridPageSettings PageCount="10" PageSizes="true"></GridPageSettings>
+        <GridPageSettings PageSize="10" PageSizes="pager" PageCount="3"></GridPageSettings>
         <GridColumns>
             <GridColumn Field=@nameof(EmployeeDTO.EmployeeCode) HeaderText="Employee Code" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip" TextAlign="TextAlign.Left"></GridColumn>
             <GridColumn Field=@nameof(EmployeeDTO.Name) HeaderText="Name" FilterSettings="@(new FilterSettings { Type = Syncfusion.Blazor.Grids.FilterType.CheckBox })" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
@@ -86,6 +85,8 @@ else
     private string errorMessage;
     private DialogSettings DialogParams = new DialogSettings { MinHeight = "400px", Width = "450px" };
     public SfGrid<EmployeeDTO> sfGrid { get; set; }
+    public string[] pager { get; set; } = new string[] { "All", "10","25", "50", "75", "100" };
+
 
     protected async override Task OnInitializedAsync()
     {
