@@ -88,7 +88,7 @@
     {
         if (Id > 0)
         {
-            var emp = await httpClient.GetFromJsonAsync<EmployeeDTO>("employee/" + Id);
+            var emp = await httpClient.GetFromJsonAsync<EmployeeDTO>(appSettings.MinimalAPI + "employee/" + Id);
             Employee = emp;
             Update = "Update";
         }
@@ -98,13 +98,13 @@
     {
         if (Id > 0)
         {
-            await httpClient.PutAsJsonAsync<EmployeeDTO>("employee", Employee);
+            await httpClient.PutAsJsonAsync<EmployeeDTO>(appSettings.MinimalAPI + "employee", Employee);
             Message = "Updated";
 
         }
         else
         {
-            await httpClient.PostAsJsonAsync<EmployeeDTO>("employee", Employee);
+            await httpClient.PostAsJsonAsync<EmployeeDTO>(appSettings.MinimalAPI + "employee", Employee);
         }
 
         AlertBox();
