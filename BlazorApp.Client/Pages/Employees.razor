@@ -85,7 +85,7 @@ else
     private string errorMessage;
     private DialogSettings DialogParams = new DialogSettings { MinHeight = "400px", Width = "450px" };
     public SfGrid<EmployeeDTO> sfGrid { get; set; }
-    public string[] pager { get; set; } = new string[] { "All", "10","25", "50", "75" };
+    public string[] pager { get; set; } = new string[] { "All", "10", "25", "50", "75" };
 
 
     protected async override Task OnInitializedAsync()
@@ -100,7 +100,7 @@ else
 
     private async Task DeleteEmployee(int Id)
     {
-        using var httpResponse = await httpClient.DeleteAsync(appSettings.MinimalAPI +"employee/" + Id);
+        using var httpResponse = await httpClient.DeleteAsync(appSettings.MinimalAPI + "employee/" + Id);
 
         if (!httpResponse.IsSuccessStatusCode)
         {
@@ -110,7 +110,7 @@ else
 
         }
 
-        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI +"employees");
+        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI + "employees");
         StateHasChanged();
     }
 
