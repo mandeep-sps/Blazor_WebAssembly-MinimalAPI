@@ -40,6 +40,11 @@ namespace BlazorApp.Server.Services
             {
                 var employees = await repository.GetAll<Employee>().Select(EmployeeExpression()).OrderBy(x => x.EmployeeCode).ToListAsync();
 
+
+                var employees1 = await repository.GetAll<Employee>().Select(EmployeeExpression()).OrderBy(x => x.EmployeeCode).ToListAsync();
+
+
+
                 return employees;
             }
             catch (Exception)
@@ -47,6 +52,8 @@ namespace BlazorApp.Server.Services
                 throw;
             }
         }
+
+
 
         public async Task<EmployeeDTO> GetEmployee(int id)
         {

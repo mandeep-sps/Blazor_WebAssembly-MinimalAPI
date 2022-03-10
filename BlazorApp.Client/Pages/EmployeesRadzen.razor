@@ -1,0 +1,130 @@
+﻿@page "/employees-radzen"
+@using Radzen
+@using Radzen.Blazor
+@using System.Linq.Expressions
+@inject HttpClient httpClient
+@inject NavigationManager navman
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+
+<h3>Employees Radzen</h3>
+@if (employees != null)
+{
+    <div class="row">
+        <div class="col-6" style="padding:0 1rem 1rem 1rem">
+            <RadzenButton Icon="add_circle_outline" Class="btn btn-sm" Text="Add New record" Click='(()=>navman.NavigateTo("/add"))' />
+        </div>
+        <div class="col-6" style="padding:0 1rem 1rem 1rem">
+            <RadzenTextBox Placeholder="Search..." @bind-Value="searchString" Class="float-end" @oninput=@(args => OnChange(args.Value.ToString())) />
+        </div>
+    </div>
+
+    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@employees" TItem="EmployeeDTO" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="EmployeeDTO" Property="Id" Filterable="false" Title="ID" Visible="false" Width="70px" />
+            <RadzenDataGridColumn TItem="EmployeeDTO" Property="EmployeeCode" Title="Employee Code" Width="100px" />
+            <RadzenDataGridColumn TItem="EmployeeDTO" Property="Name" Title="Name" Width="160px" />
+            <RadzenDataGridColumn TItem="EmployeeDTO" Property="Email" Title="Email" Width="200px" />
+            <RadzenDataGridColumn TItem="EmployeeDTO" Property="Designation" Title="Designation" Width="100px" />
+            <RadzenDataGridColumn TItem="EmployeeDTO" Property="Department" Title="Department" Width="100px" />
+            <RadzenDataGridColumn TItem="EmployeeDTO" Title="Actions" Filterable="false" Sortable="false" Width="70px">
+                <Template Context="data">
+                    <RadzenButton Click="(()=>EditEmployee(data.Id))" MouseEnter="@(args => ShowTooltip(args,"Edit",new TooltipOptions{Position=TooltipPosition.Left}) )" Icon="edit_note_circle_outline" Style="margin-right:5px" ButtonStyle="ButtonStyle.Success" />
+                    <RadzenButton Icon="delete_circle_outline" MouseEnter="@(args => ShowTooltip(args,"Delete",new TooltipOptions{Position=TooltipPosition.Left}) )" ButtonStyle="ButtonStyle.Danger" Click="(()=>ConfirmBtn(data.Id)) " />
+
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+else
+{
+    BusyDialog();
+
+}
+
+
+@code {
+    public List<EmployeeDTO> employees { get; set; }
+    public List<EmployeeDTO> rgEmployees { get; set; }
+    private string errorMessage;
+    private string searchString;
+    public string[] pager { get; set; } = new string[] { "All", "10", "25", "50", "75" };
+    public bool IsVisible { get; set; } = true;
+
+    protected async override Task OnInitializedAsync()
+    {
+        rgEmployees = employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI + "employees");
+        DialogService.Close();
+    }
+
+
+    private async Task DeleteEmployee(int Id)
+    {
+        using var httpResponse = await httpClient.DeleteAsync(appSettings.MinimalAPI + "employee/" + Id);
+
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            // set error message for display, log to console and return
+            errorMessage = httpResponse.ReasonPhrase;
+            Console.WriteLine();
+            ShowCustomNotification(NotificationSeverity.Error, "Error", errorMessage);
+        }
+
+        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI + "employees");
+        StateHasChanged();
+    }
+
+
+    private void EditEmployee(int Id)
+    {
+        navman.NavigateTo("add/" + Id);
+    }
+
+
+
+    void OnChange(string value)
+    {
+        this.employees = this.rgEmployees.Where(dfe => dfe.EmployeeCode.Contains(value) ||
+                dfe.Name.Contains(value) ||
+                dfe.Email.Contains(value) ||
+                dfe.Designation.ToString().Contains(value) ||
+                dfe.Department.ToString().Contains(value)).ToList();
+        StateHasChanged();
+    }
+
+    private async void ConfirmBtn(int Id)
+    {
+        var res = await DialogService.Confirm(" Are you sure you want to permanently delete this item ?", "Delete Employee", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (res == true)
+        {
+            await DeleteEmployee(Id);
+
+            ShowCustomNotification(NotificationSeverity.Success, "Success", "Employee deleted successfully");
+        }
+    }
+
+    private void ShowCustomNotification(NotificationSeverity severity, string summary, string detail)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = summary, Detail = detail, Duration = 4000 });
+    }
+
+    void ShowTooltip(ElementReference elementReference, string content, TooltipOptions options = null) => TooltipService.Open(elementReference, content, options);
+
+    async Task BusyDialog()
+    {
+        await DialogService.OpenAsync("", ds =>
+    @<div>
+        <div class="row">
+            <div class="col text-center p-5">
+               @* <RadzenImage Path="https://blazor.radzen.com/images/community.svg" Style="display: block; width: 200px; margin-bottom: 40px;" />*@
+                <b>Loading, please wait...</b>
+            </div>
+        </div>
+    </div>, new DialogOptions() { ShowTitle = false, Style = "min-height:auto;min-width:auto;width:auto", CloseDialogOnEsc = false });
+    }
+
+}
+
