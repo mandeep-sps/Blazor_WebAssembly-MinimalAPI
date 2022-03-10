@@ -41,7 +41,7 @@
 }
 else
 {
-    BusyDialog();
+    BusyDialog().GetAwaiter();
 
 }
 
@@ -113,18 +113,16 @@ else
 
     void ShowTooltip(ElementReference elementReference, string content, TooltipOptions options = null) => TooltipService.Open(elementReference, content, options);
 
-    async Task BusyDialog()
-    {
-        await DialogService.OpenAsync("", ds =>
+    private async Task BusyDialog() => await DialogService.OpenAsync("", ds =>
     @<div>
         <div class="row">
             <div class="col text-center p-5">
-               @* <RadzenImage Path="https://blazor.radzen.com/images/community.svg" Style="display: block; width: 200px; margin-bottom: 40px;" />*@
+                @* <RadzenImage Path="https://blazor.radzen.com/images/community.svg" Style="display: block; width: 200px; margin-bottom: 40px;" />*@
                 <b>Loading, please wait...</b>
             </div>
         </div>
-    </div>, new DialogOptions() { ShowTitle = false, Style = "min-height:auto;min-width:auto;width:auto", CloseDialogOnEsc = false });
-    }
+    </div>
+    , new DialogOptions() { ShowTitle = false, Style = "min-height:auto;min-width:auto;width:auto", CloseDialogOnEsc = false });
 
 }
 

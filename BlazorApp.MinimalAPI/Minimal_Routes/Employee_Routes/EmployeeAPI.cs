@@ -1,4 +1,4 @@
-﻿using BlazorApp.Server.Services;
+﻿using BlazorApp.MinimalAPI.Services;
 using BlazorApp.Shared;
 using Microsoft.AspNetCore.Mvc;
 namespace BlazorApp.Server

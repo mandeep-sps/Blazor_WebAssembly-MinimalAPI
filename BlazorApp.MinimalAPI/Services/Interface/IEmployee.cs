@@ -1,6 +1,6 @@
 ﻿using BlazorApp.Shared;
 
-namespace BlazorApp.Server.Services
+namespace BlazorApp.MinimalAPI.Services
 {
     public interface IEmployee
     {

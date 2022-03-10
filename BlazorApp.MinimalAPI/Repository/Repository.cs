@@ -1,4 +1,4 @@
-﻿using BlazorApp.Server.Context;
+﻿using BlazorApp.MinimalAPI.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

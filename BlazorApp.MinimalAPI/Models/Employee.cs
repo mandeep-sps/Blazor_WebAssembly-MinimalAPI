@@ -1,10 +1,9 @@
 ﻿using BlazorApp.Shared.Utils;
 
-namespace BlazorApp.Server.Models
+namespace BlazorApp.MinimalAPI.Models
 {
     public class Employee
     {
-
         public int Id { get; set; }
 
         public string Name { get; set; }

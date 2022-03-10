@@ -1,7 +1,7 @@
 using BlazorApp;
+using BlazorApp.MinimalAPI.Context;
+using BlazorApp.MinimalAPI.Services;
 using BlazorApp.Server;
-using BlazorApp.Server.Context;
-using BlazorApp.Server.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

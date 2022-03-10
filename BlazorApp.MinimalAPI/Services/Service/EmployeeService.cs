@@ -1,9 +1,9 @@
-﻿using BlazorApp.Server.Models;
+﻿using BlazorApp.MinimalAPI.Models;
 using BlazorApp.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace BlazorApp.Server.Services
+namespace BlazorApp.MinimalAPI.Services
 {
     public class EmployeeService : IEmployee
     {

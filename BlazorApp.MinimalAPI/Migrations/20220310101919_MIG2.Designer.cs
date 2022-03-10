@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorApp.MinimalAPI.Migrations
 {
     [DbContext(typeof(BlazorDBContext))]
-    [Migration("20220307102214_init")]
-    partial class init
+    [Migration("20220310101919_MIG2")]
+    partial class MIG2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,7 +23,42 @@ namespace BlazorApp.MinimalAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("BlazorApp.Server.Models.Employee", b =>
+            modelBuilder.Entity("BlazorApp.MinimalAPI.Models.ApplicationUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ContactNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationUser_Blazor");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ContactNo = "9009123456",
+                            Email = "admin@sp.com",
+                            Name = "Admin SP",
+                            Password = "admin@12345"
+                        });
+                });
+
+            modelBuilder.Entity("BlazorApp.MinimalAPI.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
