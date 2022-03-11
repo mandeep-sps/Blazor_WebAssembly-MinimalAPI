@@ -56,10 +56,16 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        rgEmployees = employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI + "employees");
+        await GetEmployees();
         DialogService.Close();
     }
 
+
+    private async Task GetEmployees()
+    {
+        rgEmployees = employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI + "employees");
+        
+    }
 
     private async Task DeleteEmployee(int Id)
     {
@@ -73,7 +79,7 @@ else
             ShowCustomNotification(NotificationSeverity.Error, "Error", errorMessage);
         }
 
-        employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI + "employees");
+        await GetEmployees();
         StateHasChanged();
     }
 
