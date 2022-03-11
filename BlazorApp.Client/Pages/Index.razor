@@ -1,0 +1,85 @@
+﻿@layout LoginLayout
+@page "/"
+@page "/index"
+@using Radzen
+@using Radzen.Blazor
+@inject DialogService DialogService
+@inject HttpClient HttpClient
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+
+<div class="container-fluid">
+    <div class="col-sm-6 offset-sm-3">
+        <div class="  form_sec">
+            <h1 class="text-center text-white">Login</h1>
+            <RadzenTemplateForm Data="@Login" class="form_sec" Submit="@((LoginDTO args) => {LoginUser(args).GetAwaiter(); })">
+                <div class="row">
+                    <RadzenFieldset Text="Login">
+                        <div class="row mb-5 mt-5">
+                            <div class="col-md-3 align-items-center d-flex">
+                                <RadzenLabel Text="Email" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenTextBox Class="w-100 form-control-lg" Style="display: block" @bind-Value=Login.Email Placeholder="Enter Email " Name="Email" />
+                                <RadzenRequiredValidator Component="Email" Text="Email is required" Popup=true Style="position: absolute" />
+                                <RadzenRegexValidator Component="Email" Text="Provide a valid email address" Pattern="@pattern" Popup=true Style="position: absolute" />
+
+                            </div>
+                        </div>
+                        <div class="row mb-5 pt-2">
+                            <div class="col-md-3 align-items-center d-flex">
+                                <RadzenLabel Text="Password" />
+                            </div>
+                            <div class="col-md-9">
+                                <RadzenPassword Placeholder="Enter password" Style="display: block" @bind-Value=Login.Password Name="Password" Class="w-100 form-control-lg" />
+                                <RadzenRequiredValidator Component="Password" Text="Password is required" Popup=true Style="position: absolute" />
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                        <RadzenButton ButtonType="ButtonType.Submit" Icon="login" Class="w-50" Text="Login" />
+                    </div>
+                </div>
+
+                <div>
+                    <p class="signp">
+                        Don't have an account? <a href="javascript:void(0)" @onclick="(()=>ShowSignup())">
+                            <span>Sign up</span>
+                        </a>
+                    </p>
+                </div>
+            </RadzenTemplateForm>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@code {
+    private LoginDTO Login = new();
+    string pattern = "^(([^<>()[\\]\\.,;:\\s@\"]+(\\.[^<>()[\\]\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+    //   var aa = /^\d{10}$/.test($(txt_contactNo).val());
+
+    async Task LoginUser(LoginDTO arg)
+    {
+        var httpResponse = await HttpClient.PostAsJsonAsync<LoginDTO>(appSettings.MinimalAPI + "login", arg);
+
+        if (!httpResponse.IsSuccessStatusCode)
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Invalid credentials", Detail = "", Duration = 4000 });
+        else
+        {
+            NavigationManager.NavigateTo("/employees");
+        }
+
+    }
+
+    private async Task ShowSignup()
+    {
+        await DialogService.OpenAsync<Signup>("", null, new DialogOptions() { Width = "850px", Height = "700px" });
+    }
+}

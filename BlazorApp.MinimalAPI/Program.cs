@@ -21,6 +21,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextPool<BlazorDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(nameof(BlazorDBContext))));
 builder.Services.AddTransient<IRepository, Repository>();
 builder.Services.AddTransient<IEmployee, EmployeeService>();
+builder.Services.AddTransient<IAccount, AccountService>();
 var app = builder.Build();
 
 app.UseCors("CorsPolicy");
@@ -33,5 +34,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapEmployeeRoutes();
+app.MapApplicationUserRoutes();
 
 app.Run();

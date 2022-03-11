@@ -1,0 +1,29 @@
+﻿body {
+    background-size: cover;
+    background-position: center;
+}
+
+.content-container {
+    min-height: 80vh;
+    height: auto;
+}
+
+.form_sec {
+    margin: 20px;
+    margin-top:100px;
+    padding: 10px 20px;
+    border-radius: 5px;    
+}
+
+legend {
+    float: right !important;
+}
+form .row {
+    margin-bottom: 16px;
+}
+
+p.signp {
+    letter-spacing: 2px;
+    text-align: center;
+    margin-top: 50px;
+}

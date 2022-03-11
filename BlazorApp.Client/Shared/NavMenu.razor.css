@@ -10,7 +10,11 @@
 .navbar-brand {
     font-size: 1.1rem;
 }
-
+img.logo {
+    height: 38px;
+    margin-right: 11px;
+    margin-top: -5px;
+}
 .oi {
     width: 2rem;
     font-size: 1.1rem;
@@ -38,6 +42,7 @@
         display: flex;
         align-items: center;
         line-height: 3rem;
+        text-decoration:none
     }
 
 .nav-item ::deep a.active {

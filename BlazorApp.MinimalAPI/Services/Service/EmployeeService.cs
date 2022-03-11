@@ -53,8 +53,6 @@ namespace BlazorApp.MinimalAPI.Services
             }
         }
 
-
-
         public async Task<EmployeeDTO> GetEmployee(int id)
         {
             try

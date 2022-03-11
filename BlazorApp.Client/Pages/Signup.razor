@@ -1,0 +1,89 @@
+﻿@layout LoginLayout
+@page "/signup"
+@using Radzen
+@using Radzen.Blazor
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject HttpClient HttpClient
+
+<div class="container-fluid">
+    <div class="form_sec">
+        <h1 class="text-center text-white">Signup</h1>
+        <RadzenTemplateForm Data="@ApplicationUser" Submit="@((ApplicationUserDTO args) => { Submit(args); })">
+            <div class="row">
+                <RadzenFieldset Text="Signup">
+                    <div class="row mb-5">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Name" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenTextBox Class="w-100 form-control-lg" AutoComplete="false" Style="display: block" @bind-Value=ApplicationUser.Name Placeholder="Enter Name" Name="Name" />
+                            <RadzenRequiredValidator Component="Name" Text="Name is required" Popup=true Style="position: absolute" />
+                            <RadzenRegexValidator Component="Name" Text="Characters are not allowed." Pattern="@patterns[0]" Popup=true Style="position: absolute" />
+                        </div>
+                    </div>
+                    <div class="row mb-5">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Email" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenTextBox Class="w-100 form-control-lg" AutoComplete="false" Style="display: block" @bind-Value=ApplicationUser.Email Placeholder="Enter Email" Name="Email" />
+                            <RadzenRequiredValidator Component="Email" Text="Email is required" Popup=true Style="position: absolute" />
+                            <RadzenRegexValidator Component="Email" Text="Provide a valid email address." Pattern="@patterns[1]" Popup=true Style="position: absolute" />
+                        </div>
+                    </div>
+                    <div class="row mb-5">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Contact No." />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenTextBox Class="w-100 form-control-lg" Style="display: block" @bind-Value=ApplicationUser.ContactNo Placeholder="Enter Contact No" Name="ContactNo" />
+                            <RadzenRequiredValidator Component="ContactNo" Text="Contact No is required" Popup=true Style="position: absolute" />
+                            <RadzenRegexValidator Component="ContactNo" Text="Provide a valid contact number." Pattern="@patterns[2]" Popup=true Style="position: absolute" />
+
+                        </div>
+                    </div>
+                    <div class="row mb-5">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Password" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenPassword Placeholder="Enter password" @bind-Value=ApplicationUser.Password Style="display: block" Name="Password" Class="w-100 form-control-lg" />
+                            <RadzenRequiredValidator Component="Password" Text="Password is required" Popup=true Style="position: absolute" />
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-3 align-items-center d-flex">
+                            <RadzenLabel Text="Confirm Password" />
+                        </div>
+                        <div class="col-md-9">
+                            <RadzenPassword Placeholder="Re-Enter your password" @bind-Value=ApplicationUser.RepeatPassword Style="display: block" Name="RepeatPassword" Class="w-100 form-control-lg" />
+                            <RadzenRequiredValidator Component="RepeatPassword" Text="Confirm Password is required" Popup=true Style="position: absolute" />
+                            <RadzenCompareValidator Visible=@(!string.IsNullOrEmpty(ApplicationUser.RepeatPassword)) Value=@ApplicationUser.Password Component="RepeatPassword" Text="Passwords should be the same" Popup=true Style="position: absolute" />
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 12px;">
+                    <RadzenButton ButtonType="ButtonType.Submit" Icon="save_as" Class="w-50" ButtonStyle="ButtonStyle.Secondary" Text="Signup" />
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </div>
+</div>
+
+@code {
+    private ApplicationUserDTO ApplicationUser = new();
+
+    List<string> patterns = new() { @"^[a-zA-Z''-'\s]{1,40}$", "^(([^<>()[\\]\\.,;:\\s@\"]+(\\.[^<>()[\\]\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$", @"\d{10}" };
+
+    async Task Submit(ApplicationUserDTO arg)
+    {
+        var httpResponse=  await HttpClient.PostAsJsonAsync<ApplicationUserDTO>(appSettings.MinimalAPI + "signup", arg);
+
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "", Detail = httpResponse.ReasonPhrase, Duration = 4000 });
+
+        DialogService.Close();
+    }
+}

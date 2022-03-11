@@ -33,7 +33,6 @@
                 <Template Context="data">
                     <RadzenButton Click="(()=>EditEmployee(data.Id))" MouseEnter="@(args => ShowTooltip(args,"Edit",new TooltipOptions{Position=TooltipPosition.Left}) )" Icon="edit_note_circle_outline" Style="margin-right:5px" ButtonStyle="ButtonStyle.Success" />
                     <RadzenButton Icon="delete_circle_outline" MouseEnter="@(args => ShowTooltip(args,"Delete",new TooltipOptions{Position=TooltipPosition.Left}) )" ButtonStyle="ButtonStyle.Danger" Click="(()=>ConfirmBtn(data.Id)) " />
-
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
@@ -42,7 +41,6 @@
 else
 {
     BusyDialog().GetAwaiter();
-
 }
 
 
@@ -69,8 +67,8 @@ else
         {
             // set error message for display, log to console and return
             errorMessage = httpResponse.ReasonPhrase;
-            Console.WriteLine();
-            ShowCustomNotification(NotificationSeverity.Error, "Error", errorMessage);
+
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = errorMessage, Duration = 4000 });
         }
 
         employees = await httpClient.GetFromJsonAsync<List<EmployeeDTO>>(appSettings.MinimalAPI + "employees");
@@ -97,18 +95,13 @@ else
 
     private async void ConfirmBtn(int Id)
     {
-        var res = await DialogService.Confirm(" Are you sure you want to permanently delete this item ?", "Delete Employee", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        var res = await DialogService.Confirm(" Are you sure you want to permanently delete this item ?", "Delete Employee", new ConfirmOptions() { OkButtonText = "Yes", Style = "min-height:auto;min-width:auto;width:auto", CancelButtonText = "No" });
         if (res == true)
         {
             await DeleteEmployee(Id);
 
-            ShowCustomNotification(NotificationSeverity.Success, "Success", "Employee deleted successfully");
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Employee deleted successfully", Duration = 4000 });
         }
-    }
-
-    private void ShowCustomNotification(NotificationSeverity severity, string summary, string detail)
-    {
-        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = summary, Detail = detail, Duration = 4000 });
     }
 
     void ShowTooltip(ElementReference elementReference, string content, TooltipOptions options = null) => TooltipService.Open(elementReference, content, options);
