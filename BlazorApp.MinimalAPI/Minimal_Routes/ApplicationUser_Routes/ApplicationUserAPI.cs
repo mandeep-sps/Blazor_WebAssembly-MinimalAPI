@@ -25,30 +25,6 @@ namespace BlazorApp.Server
             {
                 return await accountService.Login(login) ? Results.Ok() : Results.NotFound();
             });
-
-            // Get by ID //
-            //app.MapGet("api/employee/{id}", async ([FromServices] IEmployee employeeService, int id) =>
-            //{
-            //    var response = await employeeService.GetEmployee(id);
-
-            //    if (response != null)
-            //        return Results.Ok(response);
-            //    else
-            //        return Results.NotFound();
-            //});
-
-            // Edit 
-            //app.MapPut("api/employee", async ([FromServices] IEmployee employeeService, EmployeeDTO employee) =>
-            //{
-            //    return Results.Ok(await employeeService.UpdateEmployee(employee));
-            //});
-
-            // Delete
-            //    app.MapDelete("api/employee/{id}", async ([FromServices] IEmployee employeeService, int id) =>
-            //    {
-            //        return Results.Ok(await employeeService.DeleteEmployee(id));
-            //    });
-            //}
         }
     }
 }
