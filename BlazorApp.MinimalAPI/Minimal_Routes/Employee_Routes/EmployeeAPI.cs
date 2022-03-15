@@ -1,12 +1,11 @@
 ﻿using BlazorApp.MinimalAPI.Services;
 using BlazorApp.Shared;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace BlazorApp.Server
 {
     public static class EmployeeAPI
     {
-        public static void MapEmployeeRoutes( this IEndpointRouteBuilder app )
+        public static void MapEmployeeRoutes(this IEndpointRouteBuilder app)
         {
             // Get
             app.MapGet("api/employees", async ([FromServices] IEmployee employeeService) =>

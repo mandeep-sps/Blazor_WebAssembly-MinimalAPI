@@ -23,12 +23,12 @@ namespace BlazorApp.MinimalAPI.Services
             {
                 if (await repository.FindBy<ApplicationUser>(x => x.Email == applicationUser.Email).AnyAsync())
                 {
-                    return new ServiceResult<bool>(false, "Email already exist",true);
+                    return new ServiceResult<bool>(false, "Email already exist", true);
                 }
 
                 if (await repository.FindBy<ApplicationUser>(x => x.ContactNo == applicationUser.ContactNo).AnyAsync())
                 {
-                    return new ServiceResult<bool>(false, "Contact number already exist",true);
+                    return new ServiceResult<bool>(false, "Contact number already exist", true);
                 }
 
 
