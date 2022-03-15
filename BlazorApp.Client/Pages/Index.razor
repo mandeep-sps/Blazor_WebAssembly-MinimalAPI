@@ -1,13 +1,17 @@
 ﻿@layout LoginLayout
 @page "/"
 @page "/index"
+@using Newtonsoft.Json
 @using Radzen
 @using Radzen.Blazor
+
 @inject DialogService DialogService
 @inject HttpClient HttpClient
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JSRuntime
+@inject ILocalStorageService LocalStorage;
 
 <div class="container-fluid">
     <div class="col-sm-6 offset-sm-3">
@@ -58,23 +62,44 @@
 
 
 
-
-
 @code {
     private LoginDTO Login = new();
     string pattern = "^(([^<>()[\\]\\.,;:\\s@\"]+(\\.[^<>()[\\]\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
     //   var aa = /^\d{10}$/.test($(txt_contactNo).val());
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthStat { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var user = (await AuthStat).User;
+        if (user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo($"/employees", true);
+        }
+    }
 
     async Task LoginUser(LoginDTO arg)
     {
-        var httpResponse = await HttpClient.PostAsJsonAsync<LoginDTO>(appSettings.MinimalAPI + "login", arg);
+        BusyDialog().GetAwaiter();
 
-        if (!httpResponse.IsSuccessStatusCode)
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Invalid credentials", Detail = "", Duration = 4000 });
-        else
+        var apiResponse = await ResponseHandler.GetApiResponse(await HttpClient.PostAsJsonAsync<LoginDTO>(appSettings.MinimalAPI + "login", arg));
+
+        if (apiResponse.Success && apiResponse.Data != null)
         {
-            NavigationManager.NavigateTo("/employees");
+            var loginResult = JsonConvert.DeserializeObject<LoginResponse>(apiResponse.Data.ToString());
+            await LocalStorage.SetItemAsync("authToken", loginResult.Token);
+
+            ((ApiAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(loginResult.Email);
+
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", loginResult.Token);
+
+            NavigationManager.NavigateTo("/employees", true);
         }
+        else
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = apiResponse.Message, Detail = "", Duration = 4000 });
+
+        DialogService.Close();
 
     }
 
@@ -82,4 +107,15 @@
     {
         await DialogService.OpenAsync<Signup>("", null, new DialogOptions() { Width = "850px", Height = "700px" });
     }
+
+    private async Task BusyDialog() => await DialogService.OpenAsync("", ds =>
+    @<div>
+        <div class="row">
+            <div class="col text-center p-5">
+                @* <RadzenImage Path="https://blazor.radzen.com/images/community.svg" Style="display: block; width: 200px; margin-bottom: 40px;" />*@
+                <b>Loading, please wait...</b>
+            </div>
+        </div>
+    </div>
+    , new DialogOptions() { ShowTitle = false, Style = "min-height:auto;min-width:auto;width:auto", CloseDialogOnEsc = false });
 }

@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace BlazorApp.Shared
+﻿namespace BlazorApp.Shared
 {
-    public class ApplicationUserDTO
+    public class ApplicationUserResponse
     {
         public int Id { get; set; }
 
@@ -14,6 +12,11 @@ namespace BlazorApp.Shared
 
         public string Password { get; set; }
 
+
+    }
+
+    public class ApplicationUserRequest : ApplicationUserResponse
+    {
         public string RepeatPassword { get; set; }
     }
 
@@ -23,6 +26,11 @@ namespace BlazorApp.Shared
 
         public string Password { get; set; }
 
-        public string CnfrmPassword { get; set; }
+    }
+
+    public class LoginResponse : ApplicationUserResponse
+    {
+        public string Token { get; set; }
+
     }
 }

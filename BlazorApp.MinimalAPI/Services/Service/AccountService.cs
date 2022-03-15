@@ -1,11 +1,10 @@
 ﻿using BlazorApp.MinimalAPI.Models;
 using BlazorApp.Shared;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace BlazorApp.MinimalAPI.Services
 {
@@ -18,18 +17,18 @@ namespace BlazorApp.MinimalAPI.Services
             this.repository = repository;
         }
 
-        public async Task<string> Signup(ApplicationUserDTO applicationUser)
+        public async Task<ServiceResult<bool>> Signup(ApplicationUserRequest applicationUser)
         {
             try
             {
                 if (await repository.FindBy<ApplicationUser>(x => x.Email == applicationUser.Email).AnyAsync())
                 {
-                    return "Email already exist";
+                    return new ServiceResult<bool>(false, "Email already exist",true);
                 }
 
                 if (await repository.FindBy<ApplicationUser>(x => x.ContactNo == applicationUser.ContactNo).AnyAsync())
                 {
-                    return "Contact number already exist";
+                    return new ServiceResult<bool>(false, "Contact number already exist",true);
                 }
 
 
@@ -41,16 +40,16 @@ namespace BlazorApp.MinimalAPI.Services
                     Password = applicationUser.Password,
                 };
 
-                return await repository.AddAsync(model) > 0 ? "Account has been created" : "There is some issue";
+                return new ServiceResult<bool>(await repository.AddAsync(model) > 0, "Account has been created");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return new ServiceResult<bool>(ex, ex.Message);
             }
         }
 
 
-        public async Task<bool> Login(LoginDTO login)
+        public async Task<ServiceResult<LoginResponse>> Login(LoginDTO login, ConfigurationManager configuration)
         {
             try
             {
@@ -60,29 +59,53 @@ namespace BlazorApp.MinimalAPI.Services
                 {
                     if (data.Password.Equals(login.Password))
                     {
-                        return true;
+                        LoginResponse response = new()
+                        {
+                            Id = data.Id,
+                            ContactNo = data.ContactNo,
+                            Email = login.Email,
+                            Name = data.Name,
+                            Password = login.Password,
+                            Token = GenerateJSONWebToken(data, configuration)
+                        };
+
+                        return new ServiceResult<LoginResponse>(response, "Logged in successfully");
                     }
                 }
 
-                return false;
+                return new ServiceResult<LoginResponse>(null, "Invalid credentials", true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return new ServiceResult<LoginResponse>(ex, ex.Message);
             }
         }
 
-        public async Task<List<ApplicationUserDTO>> Accounts()
+        public async Task<ServiceResult<List<ApplicationUserResponse>>> Accounts()
         {
             try
             {
                 var accounts = await repository.GetAll<ApplicationUser>().Select(UserExpression()).OrderBy(x => x.Name).ToListAsync();
 
-                return accounts;
+                return new ServiceResult<List<ApplicationUserResponse>>(accounts, $"{accounts.Count} Accounts found");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return new ServiceResult<List<ApplicationUserResponse>>(ex, ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult<ApplicationUserResponse>> UserInfo(int id)
+        {
+            try
+            {
+                var userInfo = await repository.FindBy<ApplicationUser>(x => x.Id == id).Select(UserExpression()).FirstOrDefaultAsync();
+
+                return new ServiceResult<ApplicationUserResponse>(userInfo, $"User Info");
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResult<ApplicationUserResponse>(ex, ex.Message);
             }
         }
 
@@ -90,9 +113,9 @@ namespace BlazorApp.MinimalAPI.Services
         /// Private Expression for Code repete
         /// </summary>
         /// <returns></returns>
-        private static Expression<Func<ApplicationUser, ApplicationUserDTO>> UserExpression()
+        private static Expression<Func<ApplicationUser, ApplicationUserResponse>> UserExpression()
         {
-            return x => new ApplicationUserDTO
+            return x => new ApplicationUserResponse
             {
                 ContactNo = x.ContactNo,
                 Email = x.Email,
@@ -100,6 +123,26 @@ namespace BlazorApp.MinimalAPI.Services
                 Name = x.Name,
                 Password = x.Password,
             };
+        }
+
+        private string GenerateJSONWebToken(ApplicationUser userInfo, ConfigurationManager configuration)
+        {
+            var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+                  {
+                        new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                        new Claim("Id", userInfo.Id.ToString()),
+                        new Claim("Email", userInfo.Email),
+                        new Claim("Contact", userInfo.ContactNo),
+                        new Claim("Name", userInfo.Name)
+                    };
+            var token = new JwtSecurityToken(configuration["Jwt:Issuer"], configuration["Jwt:Issuer"],
+                claims, expires: DateTime.Now.AddMinutes(20), signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

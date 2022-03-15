@@ -4,10 +4,12 @@ namespace BlazorApp.MinimalAPI.Services
 {
     public interface IAccount
     {
-        Task<string> Signup(ApplicationUserDTO applicationUser);
+        Task<ServiceResult<bool>> Signup(ApplicationUserRequest applicationUser);
 
-        Task<bool> Login(LoginDTO login);
+        Task<ServiceResult<LoginResponse>> Login(LoginDTO login, ConfigurationManager configuration);
 
-        Task<List<ApplicationUserDTO>> Accounts( );
+        Task<ServiceResult<List<ApplicationUserResponse>>> Accounts();
+
+        Task<ServiceResult<ApplicationUserResponse>> UserInfo(int id);
     }
 }

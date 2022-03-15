@@ -1,0 +1,83 @@
+@using Newtonsoft.Json
+@using Radzen
+@using Radzen.Blazor
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient HttpClient
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager _navigationManager
+@inject DialogService DialogService
+
+<AuthorizeView>
+    <Authorized>
+        @{
+            var name = @context.User.Identities?.FirstOrDefault()?.Claims?.First(x => x.Type == "Name")?.Value;
+            var id = @context.User.Identities?.FirstOrDefault()?.Claims?.First(x => x.Type == "Id")?.Value;
+        }
+        @*<p class="text-white" style="font-size: medium;margin-top: auto;" @onmouseover="(()=>ViewProfile(id))"> @name</p>*@
+        <RadzenProfileMenu>
+            <Template>
+                <RadzenButton Click="(()=>ViewProfile(id))" Icon="account_circle" Text="@name">
+                </RadzenButton>
+            </Template>
+            <ChildContent>
+                <RadzenCard class="m-3">
+                    <h3 class="h5 text-center">Info</h3>
+                    <div class="d-flex flex-row">
+                        <div>
+                            <div class="">Name</div>
+                            <b>@userinfo?.Name</b>
+                            <div class="mt-3">Email</div>
+                            <b>@userinfo?.Email</b>
+                            <div class="mt-3">Contact</div>
+                            <b>@userinfo?.ContactNo</b>
+                        </div>
+                    </div>
+                    <RadzenButton class="mt-3 fw-bold" Text="Logout" style="margin-left: 0;" Click="((arg)=>Logout(arg))" Icon="logout"></RadzenButton>
+                </RadzenCard>
+
+            </ChildContent>
+        </RadzenProfileMenu>
+    </Authorized>
+</AuthorizeView>
+
+<style>
+    ul.rz-profile-menu {
+        list-style: none;
+        margin-bottom: 0;
+        padding: 0;
+        display: inline-block;
+        background-color: inherit;
+        border-left: none;
+        position: relative;
+        z-index: 3;
+    }
+
+        ul.rz-profile-menu .rz-navigation-menu {
+            top: calc(100% - -12px) !important;
+            width: 280px;
+            list-style: none;
+        }
+</style>
+
+@code {
+    public ApplicationUserResponse userinfo { get; set; }
+
+    private async Task ViewProfile(string id)
+    {
+        var apiResponse = await ResponseHandler.GetApiResponse(await HttpClient.GetAsync(appSettings.MinimalAPI + "userinfo/" + id));
+        userinfo = JsonConvert.DeserializeObject<ApplicationUserResponse>(apiResponse.Data.ToString());
+    }
+
+
+    private async Task Logout(MouseEventArgs args)
+    {
+        var res = await DialogService.Confirm(" Are you sure you want to Logout?", "Sign out", new ConfirmOptions() { OkButtonText = "Yes, Signout", Style = "min-height:auto;min-width:auto;width:auto", CancelButtonText = "No" });
+        if (res == true)
+        {
+            await LocalStorage.RemoveItemAsync("authToken");
+            ((ApiAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
+            HttpClient.DefaultRequestHeaders.Authorization = null;
+            _navigationManager.NavigateTo("/");
+        }
+    }  
+}

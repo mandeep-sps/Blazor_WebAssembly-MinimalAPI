@@ -1,30 +1,46 @@
 ﻿using BlazorApp.MinimalAPI.Services;
 using BlazorApp.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace BlazorApp.Server
 {
     public static class ApplicationUserAPI
     {
-        public static void MapApplicationUserRoutes(this IEndpointRouteBuilder app)
+        public static void MapApplicationUserRoutes(this IEndpointRouteBuilder app, ConfigurationManager configuration)
         {
-
             // Signup Post
-            app.MapPost("api/signup", async ([FromServices] IAccount accountService, ApplicationUserDTO user) =>
+            app.MapPost("api/signup", async ([FromServices] IAccount accountService, ApplicationUserRequest user) =>
             {
-                return Results.Created("api/signup", await accountService.Signup(user));
+                var response = await accountService.Signup(user);
+                var apiResponse = new ApiResponseModel(response.HasValidationError ? System.Net.HttpStatusCode.Conflict : System.Net.HttpStatusCode.OK, response.Message, response.Exception, response.Data);
+                return Results.Json(apiResponse);
             });
 
             // Signup Post
-            app.MapGet("api/accounts", async ([FromServices] IAccount accountService) =>
+            app.MapGet("api/accounts", [Authorize] async ([FromServices] IAccount accountService) =>
+             {
+                 var response = await accountService.Accounts();
+                 var apiResponse = new ApiResponseModel(response.HasValidationError ? System.Net.HttpStatusCode.Conflict : System.Net.HttpStatusCode.OK, response.Message, response.Exception, response.Data);
+                 return Results.Json(apiResponse);
+             });
+
+            app.MapGet("api/userinfo/{id}", async ([FromServices] IAccount accountService, int id) =>
             {
-                return Results.Ok(await accountService.Accounts());
+                var response = await accountService.UserInfo(id);
+                var apiResponse = new ApiResponseModel(response.HasValidationError ? System.Net.HttpStatusCode.Conflict : System.Net.HttpStatusCode.OK, response.Message, response.Exception, response.Data);
+                return Results.Json(apiResponse);
             });
 
             // login Post
             app.MapPost("api/login", async ([FromServices] IAccount accountService, LoginDTO login) =>
             {
-                return await accountService.Login(login) ? Results.Ok() : Results.NotFound();
+                var response = await accountService.Login(login, configuration);
+                var apiResponse = new ApiResponseModel(response.HasValidationError ? System.Net.HttpStatusCode.Conflict : System.Net.HttpStatusCode.OK, response.Message, response.Exception, response.Data);
+                return Results.Json(apiResponse);
             });
         }
+
+
     }
 }
