@@ -61,7 +61,7 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var apiResponse = await ResponseHandler.GetApiResponse(await httpClient.GetAsync(appSettings.MinimalAPI + "accounts"));
+        var apiResponse = await ResponseHandler.GetApiResponse(await httpClient.PatchAsync(appSettings.MinimalAPI + "accounts",null));
         RGUsers = Users = JsonConvert.DeserializeObject<List<ApplicationUserResponse>>(apiResponse.Data.ToString());
         DialogService.Close();
     }

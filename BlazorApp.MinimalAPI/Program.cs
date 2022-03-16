@@ -46,7 +46,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blazor App", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blazor App", Version = "v1", Description = "An ASP.NET Core Web API for managing Blazor App." });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization",
@@ -87,7 +87,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.DocumentTitle = ".Net 6 Minimal API");
 }
 
 app.UseAuthentication();
