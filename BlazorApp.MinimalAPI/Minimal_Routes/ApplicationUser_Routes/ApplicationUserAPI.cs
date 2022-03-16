@@ -1,6 +1,5 @@
 ﻿using BlazorApp.MinimalAPI.Services;
 using BlazorApp.Shared;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorApp.Server
@@ -22,7 +21,7 @@ namespace BlazorApp.Server
             })
                 .AllowAnonymous()
                 .WithTags("Application User");
-           
+
             // Signup Post
             app.MapMethods("api/accounts", new[] { "PATCH" }, async ([FromServices] IAccount accountService) =>
               {
