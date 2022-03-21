@@ -140,7 +140,7 @@ namespace BlazorApp.MinimalAPI.Services
                         new Claim("Name", userInfo.Name)
                     };
             var token = new JwtSecurityToken(configuration["Jwt:Issuer"], configuration["Jwt:Issuer"],
-                claims, expires: DateTime.Now.AddMinutes(20), signingCredentials: credentials);
+                claims, expires: DateTime.Now.AddHours(2), signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

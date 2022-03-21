@@ -31,6 +31,8 @@ builder.Services.AddSingleton(appSettings);
 
 builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
 
+builder.Services.AddScoped<ICookie, Cookie>();
+
 builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddScoped<DialogService>();

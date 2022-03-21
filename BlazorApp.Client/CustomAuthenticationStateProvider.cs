@@ -9,18 +9,20 @@ namespace BlazorApp.Client
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly HttpClient _httpClient;
-        private readonly ILocalStorageService _localStorage;
+        private readonly ICookie cookie;
 
-        public ApiAuthenticationStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
+        public ApiAuthenticationStateProvider(HttpClient httpClient, ICookie cookie)
         {
             _httpClient = httpClient;
-            _localStorage = localStorage;
+            this.cookie = cookie;
         }
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var savedToken = await _localStorage.GetItemAsync<string>("authToken");
+            // var savedToken = await _localStorage.GetItemAsync<string>("authToken");
 
-            if (string.IsNullOrWhiteSpace(savedToken))
+            var savedToken = await cookie.GetValue("authToken");
+
+            if (string.IsNullOrEmpty(savedToken))
             {
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }

@@ -82,13 +82,8 @@ builder.Services.AddTransient<IAccount, AccountService>();
 
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.DocumentTitle = ".Net 6 Minimal API");
-}
+app.UseSwagger();
+app.UseSwaggerUI(c => c.DocumentTitle = ".Net 6 Minimal API");
 
 app.UseAuthentication();
 app.UseAuthorization();
