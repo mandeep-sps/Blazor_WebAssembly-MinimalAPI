@@ -5,13 +5,14 @@
 @using Radzen
 @using Radzen.Blazor
 
+
 @inject DialogService DialogService
 @inject HttpClient HttpClient
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JSRuntime
-@inject ILocalStorageService LocalStorage;
+@inject ICookie cookie
 
 <div class="container-fluid">
     <div class="col-sm-6 offset-sm-3">
@@ -83,23 +84,30 @@
     {
         BusyDialog().GetAwaiter();
 
-        var apiResponse = await ResponseHandler.GetApiResponse(await HttpClient.PostAsJsonAsync<LoginDTO>(appSettings.MinimalAPI + "login", arg));
-
-        if (apiResponse.Success && apiResponse.Data != null)
+        try
         {
-            var loginResult = JsonConvert.DeserializeObject<LoginResponse>(apiResponse.Data.ToString());
-            await LocalStorage.SetItemAsync("authToken", loginResult.Token);
 
-            ((ApiAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(loginResult.Email);
+            var apiResponse = await ResponseHandler.GetApiResponse(await HttpClient.PostAsJsonAsync<LoginDTO>(appSettings.MinimalAPI + "login", arg));
 
-            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", loginResult.Token);
+            if (apiResponse.Success && apiResponse.Data != null)
+            {
+                var loginResult = JsonConvert.DeserializeObject<LoginResponse>(apiResponse.Data.ToString());
+                cookie.SetValue("authToken", loginResult.Token, 1);
 
-            NavigationManager.NavigateTo("/employees", true);
+                ((ApiAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(loginResult.Email);
+
+                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", loginResult.Token);
+
+                NavigationManager.NavigateTo("/employees", true);
+            }
+            else
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = apiResponse.Message, Detail = "", Duration = 4000 });
+
+            DialogService.Close();
         }
-        else
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = apiResponse.Message, Detail = "", Duration = 4000 });
+        catch (Exception e)
+        { throw; }
 
-        DialogService.Close();
 
     }
 

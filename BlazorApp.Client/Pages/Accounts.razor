@@ -17,14 +17,14 @@
         <div class="col-6" style="padding:1rem 0 1rem 25px">
             <h3>Users</h3>
         </div>
-        <div class="col-6" style="padding:1rem 7rem 1rem 0rem">
+        <div class="col-6" style="padding:1rem 3rem 1rem 0rem">
             <RadzenTextBox Placeholder="Search..." @bind-Value="searchString" Class="float-end" @oninput=@(args => OnChange(args.Value.ToString())) />
         </div>
     </div>
 
     <RadzenDataList WrapItems="true" AllowPaging="true" PageSize=12 Data="@Users" TItem="ApplicationUserResponse">
         <Template Context="User">
-            <RadzenCard Style="width:420px; max-width:420px">
+            <RadzenCard Style="width:380px; max-width:380px">
                 <div class="d-flex flex-row align-items-center">
                     @{
                         var path = "/png/" + @User.Name[0].ToString().ToUpper() + ".png";

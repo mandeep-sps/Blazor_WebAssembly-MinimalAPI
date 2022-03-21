@@ -3,9 +3,9 @@
 @using Radzen.Blazor
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient HttpClient
-@inject ILocalStorageService LocalStorage
 @inject NavigationManager _navigationManager
 @inject DialogService DialogService
+@inject ICookie Cookie
 
 <AuthorizeView>
     <Authorized>
@@ -74,10 +74,10 @@
         var res = await DialogService.Confirm(" Are you sure you want to Logout?", "Sign out", new ConfirmOptions() { OkButtonText = "Yes, Signout", Style = "min-height:auto;min-width:auto;width:auto", CancelButtonText = "No" });
         if (res == true)
         {
-            await LocalStorage.RemoveItemAsync("authToken");
+            await Cookie.SetValue("authToken", "", -1);
             ((ApiAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
             HttpClient.DefaultRequestHeaders.Authorization = null;
             _navigationManager.NavigateTo("/");
         }
-    }  
+    }
 }
