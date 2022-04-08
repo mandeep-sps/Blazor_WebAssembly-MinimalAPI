@@ -1,8 +1,8 @@
-﻿using BlazorApp.MinimalAPI.Context;
+﻿using BlazorApp.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace BlazorApp
+namespace BlazorApp.Data
 {
     public sealed class Repository : IRepository
     {

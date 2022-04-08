@@ -1,4 +1,5 @@
-﻿using BlazorApp.MinimalAPI.Models;
+﻿using BlazorApp.Data;
+using BlazorApp.MinimalAPI.Models;
 using BlazorApp.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

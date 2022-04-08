@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace BlazorApp
+namespace BlazorApp.Data
 {
     public interface IRepository
     {

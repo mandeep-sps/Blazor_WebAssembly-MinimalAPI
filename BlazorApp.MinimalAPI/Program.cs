@@ -1,5 +1,5 @@
-using BlazorApp;
-using BlazorApp.MinimalAPI.Context;
+using BlazorApp.Data;
+using BlazorApp.Data.Context;
 using BlazorApp.MinimalAPI.Services;
 using BlazorApp.Server;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
